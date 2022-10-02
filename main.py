@@ -15,7 +15,7 @@ from collections import Counter
 from sklearn.feature_extraction.text import CountVectorizer
 
 
-pathToFile = "/Users/firdawsbouzeghaya/Downloads/goemotions (1).json"
+pathToFile = "/Users/kawtherbouzeghaya/Downloads/goemotions.json"
 
 redditData = pd.read_json(pathToFile)
 file=open(pathToFile)
