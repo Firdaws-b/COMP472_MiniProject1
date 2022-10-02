@@ -74,4 +74,50 @@ vectorizer=CountVectorizer()
 vectorizer.fit(dataSets)
 print("Tokens: ", vectorizer.vocabulary_)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+# Part Two:
+# Processing the dataset:
+# sizeOfTokensInTheDataSet=
+print(redditData)
+dataSets = redditData[0]
+vectorizer = CountVectorizer()
+vectorizer.fit_transform(dataSets)
+print("Tokens: ", vectorizer.vocabulary_)
+
+# Part Three:
+# Creating a training dataset
+X = vectorizer.fit_transform(dataSets)
+print(vectorizer.get_feature_names_out())
+print(X.toarray())
+
+Y = vectorizer.fit_transform(redditData[1])
+print(vectorizer.get_feature_names_out())
+
+print("---------------------------")
+print(Y)
+print("---------------------------")
+print(X)
+from sklearn.preprocessing import LabelEncoder
+enc = LabelEncoder()
+
+
+Y=enc.fit_transform(redditData[1])
+print(Y)
+
+ndf = redditData
+ndf[1]= np.transpose(Y)
+print(ndf)
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
+
+print(X_train.toarray())
+print(len(X_train.toarray()))
+
+from sklearn.naive_bayes import MultinomialNB
+
+mnb = MultinomialNB()
+mnb.fit(X_train,Y_train)
+y_pred = mnb.predict(X_test)
+print(y_pred)
+from sklearn import metrics
+print(metrics.accuracy_score(Y_test,y_pred))
