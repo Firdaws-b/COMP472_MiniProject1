@@ -9,13 +9,17 @@ import json
 import pandas as pd
 import gensim
 import nltk
+from sklearn import tree
+from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
 from collections import Counter
+from sklearn import metrics
 #np.set_printoptions(threshold=sys.maxsize)
 
 from sklearn.feature_extraction import DictVectorizer
 # from pandas.io import json
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
 
 pathToFile = "/Users/firdawsbouzeghaya/Downloads/goemotions (1).json"
 
@@ -69,28 +73,82 @@ plt.title('Reddit Posts Sentiments Distribution.')
 plt.show()
 
 # Part Two:
-# Processing the dataset:
-##sizeOfTokensInTheDataSet=
-# print(redditData)
-# dataSets=redditData
-# vectorizer=CountVectorizer()
-# matrix = vectorizer.fit_transform(dataSets)
-# print(myRepeatedEmotionsList)
-# print("Tokens: ", vectorizer.vocabulary_)
-# print(loadedData)
-
-corpus = np.array(loadedData)  # This returns a multidimensional array.
-flatten_array = corpus.flatten()  # We need to transform our array to a one dimensional array.
-# vectorizer = CountVectorizer()
-vectorizer = CountVectorizer()  # Can we use DictVectorizer instead of count ?
-X = vectorizer.fit_transform(flatten_array)
-
-#frequencyTokens = dict(
- #   Counter(flatten_array))
-#print(frequencyTokens)
+# Processing the dataset (idea 1) :
+#######################################################
+#corpus = np.array(loadedData)  # This returns a multidimensional array.
+#flatten_array = corpus.flatten()  # We need to transform our array to a one dimensional array.
+#vectorizer = CountVectorizer()  # Can we use DictVectorizer instead of count ?
+#X = vectorizer.fit_transform(flatten_array)
+#X.toarray()
+#print('The total number of tokens in the dataset is:', len(vectorizer.get_feature_names_out()))
+# Processing the dataset(idea to keep )
+######################################################
+#print(redditData)
+dataSets = redditData[0]
+vectorizer = CountVectorizer()
+X=vectorizer.fit_transform(dataSets)
 #print(vectorizer.get_feature_names_out())
-print(X.toarray())
-#dataArray = vectorizer.get_feature_names_out()
-#print(dataArray)
+print("Total Number of Tokens: ", len(vectorizer.get_feature_names_out()))
+#print(X.toarray()) why is the output not showing !!
+
+#Multinomial Naive-Bayes for Emotions:
+print('----------------------------------------------------')
+print('Multinomial Naive-Bayes for emotions:')
+Y = vectorizer.fit_transform(redditData[1]) # Y is the emotions label.
+#print(vectorizer.get_feature_names_out())
+#print("---------------------------")
+#print(Y)
+from sklearn.preprocessing import LabelEncoder
+enc = LabelEncoder()
+
+Y=enc.fit_transform(redditData[1])
+#print(Y)
+ndf = redditData
+ndf[1]= np.transpose(Y)
+
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
+print(X_train.toarray())
+print(len(X_train.toarray()))
+
+mnb = MultinomialNB()
+mnb.fit(X_train,Y_train)
+y_pred = mnb.predict(X_test)
+print(y_pred)
+print("Accuracy of the dataset using emotions as a target using Multinomial Naive-Bayes is: ",metrics.accuracy_score(Y_test,y_pred))
+
+#Multinomial Naiv-Bayes for sentiments:
+print('----------------------------------------------------')
+print('Multinomial Naive-Bayes for sentiments:')
+Z=enc.fit_transform(redditData[2])
+ndf=redditData
+ndf[2]=np.transpose(Z)
+X_train, X_test, Z_train, Z_test = train_test_split(X, Z, test_size=0.2)
+mnb.fit(X_train,Z_train)
+z_pred=mnb.predict(X_test)
+print(z_pred)
+print("Accuracy of the dataset using sentiments as a target using Multinomial Naive-Bayes is: ",metrics.accuracy_score(Z_test,z_pred))
+
+print('----------------------------------------------------')
+print('Multi-Layered Perceptron for emotions: ')
+# Import MLPClassifer
+from sklearn.neural_network import MLPClassifier
+clf=MLPClassifier()
+clf.fit(X_train,Y_train)
+y_pred=clf.predict(X_test)
+print(y_pred)
+print("Accuracy of the dataset using emotions as a target using Multi-Layered Perceptron is: ",metrics.accuracy_score(Y_test,y_pred))
+print('----------------------------------------------------')
+print('Multi-Layered Perceptron for sentiments: ')
+clf.fit(X_train,Z_train)
+z_pred=clf.predict(X_test)
+print(z_pred)
+print("Accuracy of the dataset using sentiments as a target using Multi-Layered Perceptron is: ",metrics.accuracy_score(Z_test,z_pred))
+print('----------------------------------------------------')
+print('Multi-Layered Perceptron using GridSearchCV: ')
+
+
+
+
+#print(ndf)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
