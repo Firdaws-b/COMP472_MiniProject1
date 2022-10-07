@@ -127,11 +127,11 @@ mnb.fit(X_train,Z_train)
 z_pred=mnb.predict(X_test)
 print(z_pred)
 print("Accuracy of the dataset using sentiments as a target using Multinomial Naive-Bayes is: ",metrics.accuracy_score(Z_test,z_pred))
-
 print('----------------------------------------------------')
 print('Multi-Layered Perceptron for emotions: ')
 # Import MLPClassifer
 from sklearn.neural_network import MLPClassifier
+#clf=MLPClassifier(max_iter=1)
 clf=MLPClassifier()
 clf.fit(X_train,Y_train)
 y_pred=clf.predict(X_test)
@@ -145,9 +145,19 @@ print(z_pred)
 print("Accuracy of the dataset using sentiments as a target using Multi-Layered Perceptron is: ",metrics.accuracy_score(Z_test,z_pred))
 print('----------------------------------------------------')
 print('Multi-Layered Perceptron using GridSearchCV: ')
-
-
-
+print('Multi-layered perceptron for emotions:')
+parameter_space = {'hidden_layer_sizes':[(30,50),(10,10,10)],'activation':['sigmoid','tanh','relu','identity'],'solver':['adam','stochastic'],}
+from sklearn.model_selection import GridSearchCV
+mlf=GridSearchCV(clf,parameter_space)
+mlf.fit(X_train,Y_train)
+y_pred=mlf.predict(X_test)
+print("Accuracy of the dataset using emotions as a target using Multi-Layered Perceptron is gridsearcgCV: ",metrics.accuracy_score(Y_test,y_pred))
+print('----------------------------------------------------')
+print('Multi-layered perceptron for sentiments:')
+mlf.fit(X_train,Z_train)
+z_pred=mlf.predict(X_test)
+print("Accuracy of the dataset using sentiments as a target using Multi-Layered Perceptron is gridsearchCV: ",metrics.accuracy_score(Z_test,z_pred))
+print('----------------------------------------------------')
 
 #print(ndf)
 
