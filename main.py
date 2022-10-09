@@ -14,6 +14,7 @@ from matplotlib import pyplot as plt
 from collections import Counter
 
 from matplotlib.pyplot import clf
+from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder, StandardScaler
@@ -32,6 +33,8 @@ redditData = pd.read_json(pathToFile)
 file = open(pathToFile)
 loadedData = json.load(file)
 sentimentClasses = ['positive', 'neutral', 'negative', 'ambiguous']
+# create a file that contains all the information.
+performance = open("/Users/kawtherbouzeghaya/Desktop/COMP472_MiniProject1/performance.txt",'w')
 myRepeatedEmotionsList = redditData[1]  # We first need to get the list of emotions from the data set
 # Then we will need to remove the repeated values and convert the list back.
 
@@ -108,12 +111,14 @@ ndf = redditData
 ndf[1]= np.transpose(Y)
 print(ndf)
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
-# Decision Tree
+
+# Base Decision Tree
 #create and print the decision tree
+
 emotionsDecisionTree = tree.DecisionTreeClassifier()
 emotionsDecisionTree.fit(X_train,Y_train)
-emotionsDecisionTrePrediction = emotionsDecisionTree.predict(X_test)
-print("Emotion's Accuracy(without criterion)  :", metrics.accuracy_score(Y_test, emotionsDecisionTrePrediction))
+emotionsBaseDecisionTrePrediction = emotionsDecisionTree.predict(X_test)
+print("Emotion's Accuracy(without criterion)  :", metrics.accuracy_score(Y_test, emotionsBaseDecisionTrePrediction))
 
 
 #Sentiments
@@ -136,18 +141,96 @@ X_train, X_test, Z_train, Z_test = train_test_split(X, Z, test_size=0.2)
 #Decision Tree
 sentimentDecisionTree = tree.DecisionTreeClassifier()
 sentimentDecisionTree.fit(X_train, Z_train)
-sentimentDecisionTreePrediction = sentimentDecisionTree.predict(X_test)
-print("Sentiments' Accuracy(without criterion)  :", metrics.accuracy_score(Z_test, sentimentDecisionTreePrediction))
+sentimentBaseDecisionTreePrediction = sentimentDecisionTree.predict(X_test)
+print("Sentiments' Accuracy(without criterion)  :", metrics.accuracy_score(Z_test, sentimentBaseDecisionTreePrediction))
 
 #Top-DT
 print(" Decision Tree analysis (Hyper parameters)using Grid search")
 
 # Setting up our tuning parameters.
-parametersGrid = { 'criterion':('entropy','gini'), 'max_depth':(4,6), 'min_sample_split':(2,3,6)}
-grid = GridSearchCV(clf, param_grid=parametersGrid, cv=5)
+parametersGrid = { 'criterion': ['entropy','gini'],
+                   'max_depth':[4,6],
+                   'min_samples_split':[2,3,6]
+                  }
 #Emotion
 print("------Emotions Decision Tree analysis (hyper parameters)--------")
+grid = GridSearchCV(emotionsDecisionTree, param_grid=parametersGrid, cv=5)
 grid.fit(X_train, Y_train)
+emotionsTopDecisionTreePrediction = grid.predict(X_test)
+
+print("Emotion DT best score is ", grid.best_score_)
+print("Emotion DT best hyper parameters are ", grid.best_params_)
+
+
+#Sentimenets
+print("------Sentimenet Decision Tree analysis (hyper parameters)--------")
+grid2 = GridSearchCV(sentimentDecisionTree, param_grid=parametersGrid,cv=5)
+grid2.fit(X_train,Y_train)
+sentimentTopDecisionTreePrediction = grid2.predict(X_test)
+
+print("Sentiment DT best score is ", grid2.best_score_)
+print("Sentiment DT best hyper parameters are ", grid2.best_params_)
+
+# PART 2.4
+# Writing in a file called Performance:
+
+#Emotions:
+performance.write("Emotions Decision Tree: ")
+performance.write("\n")
+performance.write("Accuracy(without criterion) :")
+performance.write(str(metrics.accuracy_score(Y_test, emotionsBaseDecisionTrePrediction)))
+performance.write("\n")
+performance.write("Best hyper parameters ")
+performance.write(str(grid.best_params_))
+performance.write("\n")
+performance.write("Best score ")
+performance.write(str(grid.best_score_ ))
+performance.write("\n")
+performance.write("Base DT confusion matrix:\n ")
+print(confusion_matrix(Y_test,emotionsBaseDecisionTrePrediction),file = performance)
+performance.write("\n")
+performance.write("Base DT Classification report:\n")
+print(classification_report(Y_test,emotionsBaseDecisionTrePrediction),file = performance)
+performance.write("\n")
+performance.write("Top DT confusion matrix:\n ")
+print(confusion_matrix(Y_test,emotionsTopDecisionTreePrediction),file = performance)
+performance.write("\n")
+performance.write("Top DT Classification report:\n")
+print(classification_report(Y_test,emotionsTopDecisionTreePrediction), file=performance)
+performance.write("\n")
+performance.write("---------------------------------------------------------------------")
+performance.write("\n")
+
+
+#Sentiments
+performance.write("Sentiments Decision Tree:")
+performance.write("\n")
+performance.write("Accuracy(without criterion) : ")
+performance.write(str(metrics.accuracy_score(Z_test, sentimentBaseDecisionTreePrediction)))
+performance.write("\n")
+performance.write("Best hyper parameters" ),
+performance.write(str(grid2.best_params_))
+performance.write("\n")
+performance.write("Best Score "),
+performance.write(str(grid2.best_score_))
+performance.write("\n")
+performance.write("Base DT confusion matrix\n")
+print(confusion_matrix(Z_test,sentimentBaseDecisionTreePrediction),file = performance)
+performance.write("\n")
+performance.write("Base DT Classification report:\n")
+print(classification_report(Z_test,sentimentBaseDecisionTreePrediction),file = performance)
+performance.write("\n")
+performance.write("Top DT confusion matrix\n")
+print(confusion_matrix(Z_test,sentimentTopDecisionTreePrediction),file = performance)
+performance.write("\n")
+performance.write("Top DT Classification report:\n")
+print(classification_report(Z_test,sentimentTopDecisionTreePrediction), file=performance)
+performance.write("\n")
+
+performance.write("---------------------------------------------------------------------")
+
+print("This is just a test")
+
 #print(" Tuned Decision Tree parameters:".format(emotionsDecisionTree.best_params_))
 #print("Best score is {}".format(emotionsDecisionTree.best_score))
 
