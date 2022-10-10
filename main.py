@@ -1,7 +1,5 @@
-# This is a sample Python script.
 import sys
 from collections import OrderedDict
-
 import numpy as np
 import json
 # Press ⌃R to execute it or replace it with your code.
@@ -17,7 +15,7 @@ from collections import Counter
 from sklearn import metrics
 from sklearn.metrics import classification_report
 from sklearn.feature_extraction import DictVectorizer
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import GridSearchCV
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
 
@@ -102,7 +100,6 @@ from sklearn.preprocessing import LabelEncoder
 enc = LabelEncoder()
 
 Y = enc.fit_transform(redditData[1])
-# print(Y)
 ndf = redditData
 ndf[1] = np.transpose(Y)
 
@@ -110,6 +107,8 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
 print(X_train.toarray())
 print(len(X_train.toarray()))
 
+##################################### 2.3.1
+# Multinomial Naive-Bayes for Emotions:
 mnb = MultinomialNB()
 mnb.fit(X_train, Y_train)
 y_pred_MNB_emotions = mnb.predict(X_test)
@@ -143,6 +142,8 @@ confusion_matrix(Y_test, y_pred_MNB_emotions)
 performance.write("Classification report of MNB sentiments: \n")
 print(classification_report(Z_test, z_pred_sentiments_MNB), file=performance)
 print('----------------------------------------------------')
+#################### 2.3.3 MLP
+# Emotions MLP
 print('Multi-Layered Perceptron for emotions: ')
 # Import MLPClassifer
 from sklearn.neural_network import MLPClassifier
@@ -153,12 +154,13 @@ y_pred_MLP_emotions = clf.predict(X_test)
 print("Accuracy of the dataset using emotions as a target using Multi-Layered Perceptron is: ",
       metrics.accuracy_score(Y_test, y_pred_MLP_emotions))
 # Implementation of Confusion Matrix of MLP:
-# print("Confusion Matrix for emotions:\n", confusion_matrix(Y_test, y_pred_MLP_emotions))
 performance.write("Confusion Matrix of MLP emotions:\n")
 print(confusion_matrix(Y_test, y_pred_MLP_emotions, ), file=performance)
 performance.write("Classification report of MLP emotions: \n")
 print(classification_report(Y_test, y_pred_MLP_emotions), file=performance)
 print('----------------------------------------------------')
+
+# Sentiments Top MLP
 print('Multi-Layered Perceptron for sentiments: ')
 clf.fit(X_train, Z_train)
 z_pred_sentiments_MLP = clf.predict(X_test)
@@ -171,11 +173,10 @@ print(confusion_matrix(Z_test, z_pred_sentiments_MLP), file=performance)
 performance.write("Classification report of MLP sentiments: \n")
 print(classification_report(Z_test, z_pred_sentiments_MLP), file=performance)
 print('----------------------------------------------------')
+#################### 2.3.6 TOP MLP
+# Emotions Top MLP
 print('Multi-Layered Perceptron using GridSearchCV: ')
-
 print('Multi-layered perceptron for emotions:')
-from sklearn.model_selection import GridSearchCV
-
 parameter_space = {'hidden_layer_sizes': [(30, 50), (10, 10, 10)],
                    'activation': ['logistic', 'tanh', 'relu', 'identity'],
                    'solver': ['adam', 'sgd']}
@@ -191,7 +192,7 @@ performance.write("Classification report of Top MLP sentiments: \n")
 print(classification_report(Y_test, y_pred_TopMLP_emotions), file=performance)
 
 print('----------------------------------------------------')
-
+# Sentiments Top MLP
 print('Multi-layered perceptron for sentiments:')
 mlf.fit(X_train, Z_train)
 z_pred_sentiments_TopMLP = mlf.predict(X_test)
@@ -210,15 +211,91 @@ print('----------------------------------------------------')
 # precision = open('precision.txt','x')
 
 # 2.5
-# Use tf-df instead of work frequencies, redo part 2.3
-tfidfVectorizer = TfidfVectorizer()
-X = tfidfVectorizer.fit_transform(dataSets)
+# Remove stop words and redo all the steps of  2.3
+stopWordVectorizer = CountVectorizer(stop_words='english')
+X_stopWord = stopWordVectorizer.fit_transform(dataSets)
+X_train_stopWords, X_test_stopWords, Y_train, Y_test = train_test_split(X_stopWord, Y, test_size=0.2)
+
+##################################### 2.3.1
 # Multinomial Naive-Bayes for Emotions:
 print('----------------------------------------------------')
-print('Multinomial Naive-Bayes for emotions using :')
-Y = vectorizer.fit_transform(redditData[1])  # Y is the emotions label.
-from sklearn.preprocessing import LabelEncoder
+print('Multinomial Naive-Bayes for emotions using english stop words:')
+mnb.fit(X_train_stopWords, Y_train)
+y_pred_stopWords_MNB_emotions = mnb.predict(X_test_stopWords)
+print(y_pred_stopWords_MNB_emotions)
+print("Accuracy of the dataset using emotions as a target using Multinomial Naive-Bayes is: ",
+      metrics.accuracy_score(Y_test, y_pred_stopWords_MNB_emotions))
+performance.write("Confusion Matrix of emotions using MNB with english stop words: \n")
+performance.write("Confusion Matrix of MNB emotions:\n")
+print(confusion_matrix(Y_test, y_pred_stopWords_MNB_emotions), file=performance)
+performance.write("Classification report of MNB emotions with english stop words: \n")
+print(classification_report(Y_test, y_pred_stopWords_MNB_emotions), file=performance)
 
+# Multinomial Naive-Bayes for sentiments:
+print('----------------------------------------------------')
+print('Multinomial Naive-Bayes for sentiments:')
+mnb.fit(X_train_stopWords,Y_train)
+y_pred_stopWords_MNB_sentiments = mnb.predict(X_test_stopWords)
+print(y_pred_stopWords_MNB_sentiments)
+print("Accuracy of the dataset using sentiments as a target using Multinomial Naive-Bayes is: ",
+      metrics.accuracy_score(Y_test, y_pred_stopWords_MNB_sentiments))
+performance.write("Confusion Matrix of sentiments using MNB with english stop words: \n")
+performance.write("Confusion Matrix of MNB sentiments:\n")
+print(confusion_matrix(Y_test, y_pred_stopWords_MNB_sentiments), file=performance)
+performance.write("Classification report of MNB sentiments with english stop words: \n")
+print(classification_report(Y_test, y_pred_stopWords_MNB_sentiments), file=performance)
+print('----------------------------------------------------')
+
+##################################### 2.3.3 MLP:
+# Emotions MLP
+print('Multi-Layered Perceptron for emotions with english stop words: ')
+clf.fit(X_train_stopWords, Y_train)
+y_pred_MLP_emotions_stopWords = clf.predict(X_test_stopWords)
+print("Accuracy of the dataset using emotions as a target using Multi-Layered Perceptron is: ",
+      metrics.accuracy_score(Y_test, y_pred_MLP_emotions_stopWords))
+performance.write("Confusion Matrix of MLP emotions using english stop words:\n")
+print(confusion_matrix(Y_test, y_pred_MLP_emotions_stopWords, ), file=performance)
+performance.write("Classification report of MLP emotions using english stop words: \n")
+print(classification_report(Y_test, y_pred_MLP_emotions_stopWords), file=performance)
+print('----------------------------------------------------')
+# Sentiments MLP
+print('Multi-Layered Perceptron for sentiments with english stop words: ')
+clf.fit(X_train_stopWords, Z_train)
+z_pred_sentiments_MLP_stopWords = clf.predict(X_test_stopWords)
+print(z_pred_sentiments_MLP_stopWords)
+print("Accuracy of the dataset using sentiments as a target using Multi-Layered Perceptron is: ",
+      metrics.accuracy_score(Z_test, z_pred_sentiments_MLP_stopWords))
+performance.write("Confusion Matrix of MLP sentiments:\n")
+print(confusion_matrix(Z_test, z_pred_sentiments_MLP_stopWords), file=performance)
+performance.write("Classification report of MLP sentiments: \n")
+print(classification_report(Z_test, z_pred_sentiments_MLP_stopWords), file=performance)
+print('----------------------------------------------------')
+
+#################### 2.3.6 TOP MLP
+# Emotions Top MLP
+print('----------------------------------------------------')
+print('Multi-Layered Perceptron using GridSearchCV using english stop words: ')
+print('Multi-layered perceptron for emotions using english stop words:')
+mlf.fit(X_train_stopWords, Y_train)
+y_pred_TopMLP_emotions_stopWords = mlf.predict(X_test_stopWords)
+print("Accuracy of the dataset using emotions as a target using Multi-Layered Perceptron in gridsearchCV: ",
+      metrics.accuracy_score(Y_test, y_pred_TopMLP_emotions_stopWords))
+performance.write("Confusion Matrix of ToP MLP emotions using english stop words:\n")
+print(confusion_matrix(Y_test, y_pred_TopMLP_emotions_stopWords), file=performance)
+performance.write("Classification report of Top MLP sentiments: \n")
+print(classification_report(Y_test, y_pred_TopMLP_emotions_stopWords), file=performance)
+print('----------------------------------------------------')
+# Sentiments Top MLP
+print('Top Multi-layered perceptron for sentiments using english stop words :')
+mlf.fit(X_train_stopWords, Z_train)
+z_pred_sentiments_TopMLP_stopWords = mlf.predict(X_test_stopWords)
+print("Accuracy of the dataset using sentiments as a target using Multi-Layered Perceptron with gridsearchCV: ",
+      metrics.accuracy_score(Z_test, z_pred_sentiments_TopMLP_stopWords))
+performance.write("Confusion Matrix of Top MLP sentiments:\n")
+print(confusion_matrix(Z_test, z_pred_sentiments_TopMLP_stopWords), file=performance)
+performance.write("Classification report of Top MLP sentiments: \n")
+print(classification_report(Z_test, z_pred_sentiments_TopMLP_stopWords), file=performance)
+print('----------------------------------------------------')
 
 
 performance.close()
