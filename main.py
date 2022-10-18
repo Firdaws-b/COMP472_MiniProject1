@@ -1,7 +1,8 @@
 # This is a sample Python script.
 import sys
 from collections import OrderedDict
-
+import gensim.downloader as api
+model=api.load('word2vec-google-news-300')
 import datasets as dataSets
 import numpy as np
 import json
@@ -165,7 +166,7 @@ print("Emotion DT best hyper parameters are ", grid.best_params_)
 #Sentimenets
 print("------Sentimenet Decision Tree analysis (hyper parameters)--------")
 grid2 = GridSearchCV(sentimentDecisionTree, param_grid=parametersGrid,cv=5)
-grid2.fit(X_train,Y_train)
+grid2.fit(X_train,Z_train)
 sentimentTopDecisionTreePrediction = grid2.predict(X_test)
 
 print("Sentiment DT best score is ", grid2.best_score_)
@@ -229,8 +230,63 @@ performance.write("\n")
 
 performance.write("---------------------------------------------------------------------")
 
-print("This is just a test")
+# Section 2.5 Using english stop words.
+stopWordVectorizer = CountVectorizer(stop_words='english')
+X_stopWord = stopWordVectorizer.fit_transform(dataSets)
+X_train_stopWords, X_test_stopWords, Y_train, Y_test = train_test_split(X_stopWord,Y,test_size=0.2)
 
+# 2.3.2 Base Decision Tree
+
+# Sentiments:
+print("Base Decision Tree for sentiments with english stop words: ")
+sentimentDecisionTree.fit(X_train_stopWords,Z_train)
+sentimentBaseDecisionTreeStopWords = sentimentDecisionTree.predict(X_test_stopWords)
+print("Accuracy of the dataset using sentiments as a target and Base DT is ",metrics.accuracy_score(Z_test,sentimentBaseDecisionTreeStopWords))
+performance.write("Confusion Matrix of Base DT sentiments using english stop words :\n")
+print(confusion_matrix(Z_test,sentimentBaseDecisionTreeStopWords), file=performance)
+performance.write("Classification report for sentiment using english stop words:\n")
+print(classification_report(Z_test,sentimentBaseDecisionTreeStopWords), file=performance)
+performance.write("\n")
+performance.write("----------------------------------------------------------")
+
+# Emotions:
+print("Base Decision Tree for emotions using english stop words: ")
+emotionsDecisionTree.fit(X_train_stopWords,Y_train)
+emotionsBaseDecisionTreeStopWords = emotionsDecisionTree.predict(X_test_stopWords)
+print("Accuracy of the dataset using emotions as a target and Base DT is ", metrics.accuracy_score(Y_test,emotionsBaseDecisionTreeStopWords))
+performance.write("Confusion Matrix of DT emotions using english stop words: \n")
+print(confusion_matrix(Y_test,emotionsBaseDecisionTreeStopWords), file=performance)
+performance.write("Classification report for emotions using english stop words:\n")
+print(classification_report(Y_test,emotionsBaseDecisionTreeStopWords), file=performance)
+performance.write("\n")
+performance.write("-------------------------------------------------------------")
+
+# 2.3.5 Top decision tress.
+
+# Sentiments:
+print("Top Decision Tree for sentiments using english stop words: ")
+grid2.fit(X_train_stopWords,Z_train)
+sentimentTopDecisionTreeStopWords = grid2.predict(X_test_stopWords)
+print("Accuracy of the dataset using sentiments as a target and Top DT is", metrics.accuracy_score(Z_test,sentimentTopDecisionTreeStopWords))
+performance.write("Confusion Matrix of TDT sentiments using english stop words: \n")
+print(confusion_matrix(Z_test,sentimentTopDecisionTreeStopWords), file=performance)
+performance.write("Classification report for sentiments using english stop words:\n")
+print(classification_report(Z_test,sentimentTopDecisionTreeStopWords), file=performance)
+performance.write("\n")
+performance.write("--------------------------------------------------------------------")
+
+# Emotions:
+print("Top Decision Tree for emotions using english stop words: ")
+grid.fit(X_train_stopWords,Y_train)
+emotionsTopDecisionTreeStopWords = grid.predict(X_test_stopWords)
+print("Accuracy of the dataset using emotions as a target and Top DT is ", metrics.accuracy_score(Y_test,emotionsTopDecisionTreeStopWords))
+performance.write("Confusion Matrix of TDT emotions using english stop words: \n")
+print(confusion_matrix(Y_test, emotionsTopDecisionTreeStopWords), file=performance)
+performance.write("Classification report for emotions using english stop words:\n")
+print(classification_report(Y_test,emotionsTopDecisionTreeStopWords), file=performance)
+performance.write("\n")
+performance.write("----------------------------------------------------------------------")
+#
 #print(" Tuned Decision Tree parameters:".format(emotionsDecisionTree.best_params_))
 #print("Best score is {}".format(emotionsDecisionTree.best_score))
 
