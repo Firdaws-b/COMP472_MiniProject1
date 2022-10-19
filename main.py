@@ -2,11 +2,11 @@ import sys
 from collections import OrderedDict
 import numpy as np
 import json
+import nltk
 # Press ⌃R to execute it or replace it with your code.
 # Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 import pandas as pd
 import gensim
-import nltk
 from sklearn import tree
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
@@ -18,7 +18,7 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn.model_selection import GridSearchCV
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
-
+from nltk.tokenize import word_tokenize
 performance = open('performance', 'w')
 performance.write("Part 2.4 of the mini project \n")
 # precision.write("Emotions: ")
@@ -28,13 +28,21 @@ performance.write("Part 2.4 of the mini project \n")
 # precision.write("Multi-Layered Perceptron Classifier Using GridSearchCv: \n")
 
 
+#pathToFile = "/Users/firdawsbouzeghaya/Desktop/geomotions_test-1.json"
 pathToFile = "/Users/firdawsbouzeghaya/Downloads/goemotions (1).json"
 
 redditData = pd.read_json(pathToFile)
 file = open(pathToFile)
 loadedData = json.load(file)
+redditPosts = np.array(loadedData)
+text = redditPosts[:,0]
+tokenized_text = [word_tokenize(post) for post in text]
+print(len(sum(tokenized_text,[])))
+#array=np.array2string(redditPosts[:,0])
+
 sentimentClasses = ['positive', 'neutral', 'negative', 'ambiguous']
 myRepeatedEmotionsList = redditData[1]  # We first need to get the list of emotions from the data set
+
 # Then we will need to remove the repeated values and convert the list back.
 
 myUnrepeatedEmotionsClassesList = dict.fromkeys(myRepeatedEmotionsList)
@@ -51,6 +59,41 @@ numberOfPositiveSentiments = redditData[2].value_counts()['positive']
 numberOfNegativeSentiments = redditData[2].value_counts()['negative']
 numberOfAmbiguousSentiments = redditData[2].value_counts()['ambiguous']
 numberOfNeutralSentiments = redditData[2].value_counts()['neutral']
+
+
+##################################################################
+##### This part is word embeddings.
+
+import gensim.downloader as api
+model=api.load('word2vec-google-news-300')
+
+#dataSets = redditData[0]
+#print(loadedData[1])
+print(redditData[0])
+redditPosts=np.array(loadedData)
+#redditPosts=np.array2string(redditData[0])
+from nltk.tokenize import word_tokenize
+array=np.array2string(redditPosts[:,0])
+#tokenizer=word_tokenize(array)
+arrayNew=redditData[0].tolist()
+
+#' '.join(arrayNew)
+#print("".join(arrayNew))
+myNewJointList="".join(arrayNew)
+print(myNewJointList)
+#print(myNewJointList)
+tokenizer=word_tokenize(myNewJointList)
+#print(tokenizer)
+print('Total Number of tokens using tokenizer from nltk: ',len(tokenizer))
+X=list(model.wv.vcoba)
+
+
+#corpus = np.array(loadedData)  # This returns a multidimensional array.
+#data=np.array2string(corpus)
+#print('Total Number of tokens using tokenizer from nltk 2nd option: ',len(word_tokenize(data)))
+
+##############################################################################################
+
 
 # Labels
 sentimentClassesData = [numberOfPositiveSentiments, numberOfNegativeSentiments, numberOfAmbiguousSentiments,
@@ -88,8 +131,7 @@ vectorizer = CountVectorizer()
 X = vectorizer.fit_transform(dataSets)
 # print(vectorizer.get_feature_names_out())
 print("Total Number of Tokens: ", len(vectorizer.get_feature_names_out()))
-# print(X.toarray()) why is the output not showing !!
-print(X[0])
+
 
 # Multinomial Naive-Bayes for Emotions:
 print('----------------------------------------------------')
@@ -206,9 +248,6 @@ print('----------------------------------------------------')
 
 # 2.4
 # Creation of a txt file called "precision" to write in it all the results of our analysis' results:
-# Implementation of Confusion Matrix:
-# print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred_MNB_emotions))
-# precision = open('precision.txt','x')
 
 # 2.5
 # Remove stop words and redo all the steps of  2.3
@@ -296,6 +335,12 @@ print(confusion_matrix(Z_test, z_pred_sentiments_TopMLP_stopWords), file=perform
 performance.write("Classification report of Top MLP sentiments: \n")
 print(classification_report(Z_test, z_pred_sentiments_TopMLP_stopWords), file=performance)
 print('----------------------------------------------------')
+############################################################
+# Part 3: Embeddings as features:
+# 3.1 Use gensim.downloader.load to load the word2vec-google-new-300 pre-trained embedding model
+import gensim.downloader as api
+model=api.load('word2vec-google-news-300')
+# 3.2 Use Tokenizer to extract words from the reddit posts and display the number of tokens in the training set
 
 
 performance.close()
