@@ -181,7 +181,24 @@ print("Accuracy of the dataset using sentiments as a target using Multi-Layered 
 
 #---------------------------2.3.4 TOP MNB:----------------------
 # Emotions:
+print("------- TOP NB hyper parameters for emotions ---------")
+parametersGrid = {'alpha': [0.5, 0, 2, 1, 0.75]}
+grida = GridSearchCV(mnb, param_grid=parametersGrid, cv=5)
+grida.fit(X_train, Y_train)
+emotionsTopMNBprediction = grida.predict(X_test)
+
+print("Emotion MNB best score is ", grida.best_score_)
+print("Emotion MNB best hyper parameter is ", grida.best_params_)
+
 # Sentiments:
+print("------- TOP NB hyper parameters for emotions ---------")
+parametersGrid = {'alpha': [0.5, 0, 2, 1, 0.75]}
+gridb = GridSearchCV(mnb, param_grid=parametersGrid, cv=5)
+gridb.fit(X_train, Z_train)
+sentimentTopMNBprediction = gridb.predict(X_test)
+
+print("Emotion MNB best score is ", gridb.best_score_)
+print("Emotion MNB best hyper parameter is ", gridb.best_params_)
 #---------------------------------------------------------------
 
 #---------------------------2.3.5 TOP DT------------------------
@@ -240,6 +257,15 @@ performance.write("Confusion Matrix of MNB emotions:\n")
 print(confusion_matrix(Y_test, y_pred_MNB_emotions), file=performance)
 performance.write("Classification report of MNB emotions: \n")
 print(classification_report(Y_test, y_pred_MNB_emotions), file=performance)
+performance.write("\n")
+performance.write("Top MNB confusion matrix:\n ")
+print(confusion_matrix(Y_test,emotionsTopMNBprediction),file = performance)
+performance.write("\n")
+performance.write("Top MNB Classification report:\n")
+print(classification_report(Y_test,emotionsTopMNBprediction), file=performance)
+performance.write("\n")
+performance.write("---------------------------------------------------------------------")
+performance.write("\n")
 
 # Sentiments:
 performance.write("---------------------------------------------------------------\n")
@@ -250,6 +276,17 @@ performance.write("Confusion Matrix of MNB sentiments:\n")
 print(confusion_matrix(Z_test, z_pred_sentiments_MNB), file=performance)
 performance.write("Classification report of MNB sentiments: \n")
 print(classification_report(Z_test, z_pred_sentiments_MNB), file=performance)
+performance.write("\n")
+performance.write("Base DT Classification report:\n")
+print(classification_report(Z_test,sentimentTopMNBprediction),file = performance)
+performance.write("\n")
+performance.write("Top DT confusion matrix\n")
+print(confusion_matrix(Z_test,sentimentTopMNBprediction),file = performance)
+performance.write("\n")
+performance.write("Top DT Classification report:\n")
+print(classification_report(Z_test,sentimentTopMNBprediction), file=performance)
+performance.write("\n")
+performance.write("---------------------------------------------------------------------")
 #---------------------------------------------------------------
 
 #---------------------------2.4.2  DT:--------------------------
@@ -375,7 +412,21 @@ print(confusion_matrix(Y_test, y_pred_stopWords_MNB_emotions), file=performance)
 performance.write("Classification report of MNB emotions with english stop words: \n")
 print(classification_report(Y_test, y_pred_stopWords_MNB_emotions), file=performance)
 
+# Top
+performance.write("Emotions Top MNB: \n")
+print("Top MNB for emotions using english stop words: ")
+grida.fit(X_train_stopWords,Y_train)
+emotionsTopMNBStopWords = grida.predict(X_test_stopWords)
+print("Accuracy of the dataset using emotions as a target and Top MNB is ", metrics.accuracy_score(Y_test,emotionsTopMNBStopWords))
+performance.write("Confusion Matrix of TMNB emotions using english stop words: \n")
+print(confusion_matrix(Y_test, emotionsTopMNBStopWords), file=performance)
+performance.write("Classification report for emotions using english stop words:\n")
+print(classification_report(Y_test,emotionsTopMNBStopWords), file=performance)
+performance.write("\n")
+performance.write("----------------------------------------------------------------------")
+
 # Sentiments:
+# Base
 print('----------------------------------------------------')
 print('Multinomial Naive-Bayes for sentiments:')
 mnb.fit(X_train_stopWords,Y_train)
@@ -389,6 +440,19 @@ print(confusion_matrix(Y_test, y_pred_stopWords_MNB_sentiments), file=performanc
 performance.write("Classification report of MNB sentiments with english stop words: \n")
 print(classification_report(Y_test, y_pred_stopWords_MNB_sentiments), file=performance)
 print('----------------------------------------------------')
+
+# Top
+performance.write("Sentiments Top MNB")
+print("Top MNB for sentiments using english stop words: ")
+gridb.fit(X_train_stopWords,Z_train)
+sentimentTopMNBStopWords = gridb.predict(X_test_stopWords)
+print("Accuracy of the dataset using sentiments as a target and Top MNB is", metrics.accuracy_score(Z_test,sentimentTopDecisionTreeStopWords))
+performance.write("Confusion Matrix of TMNB sentiments using english stop words: \n")
+print(confusion_matrix(Z_test,sentimentTopMNBStopWords), file=performance)
+performance.write("Classification report for sentiments using english stop words:\n")
+print(classification_report(Z_test,sentimentTopMNBStopWords), file=performance)
+performance.write("\n")
+performance.write("--------------------------------------------------------------------")
 
 #---------------------------------------------------------------
 
