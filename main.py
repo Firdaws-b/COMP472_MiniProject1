@@ -1,24 +1,19 @@
-import sys
-from collections import OrderedDict
 import numpy as np
 import json
-import nltk
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 import pandas as pd
-import gensim
-from sklearn import tree
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
 from collections import Counter
 from sklearn import metrics
 from sklearn.metrics import classification_report
-from sklearn.feature_extraction import DictVectorizer
 from sklearn.model_selection import GridSearchCV
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from nltk.tokenize import word_tokenize
+from sklearn.preprocessing import LabelEncoder
+from statistics import mean
+import gensim.downloader as api
 performance = open('performance', 'w')
 performance.write("Part 2.4 of the mini project \n")
 # precision.write("Emotions: ")
@@ -35,10 +30,7 @@ redditData = pd.read_json(pathToFile)
 file = open(pathToFile)
 loadedData = json.load(file)
 redditPosts = np.array(loadedData)
-text = redditPosts[:,0]
-tokenized_text = [word_tokenize(post) for post in text]
-print(len(sum(tokenized_text,[])))
-#array=np.array2string(redditPosts[:,0])
+
 
 sentimentClasses = ['positive', 'neutral', 'negative', 'ambiguous']
 myRepeatedEmotionsList = redditData[1]  # We first need to get the list of emotions from the data set
@@ -49,8 +41,8 @@ myUnrepeatedEmotionsClassesList = dict.fromkeys(myRepeatedEmotionsList)
 
 myRepeatedEmotionsListSorted = np.sort(myRepeatedEmotionsList)  # Used to sort the emotions' list by alphabetical order
 
-myUnrepeatedEmotionsClassesList = np.unique(
-    myRepeatedEmotionsListSorted).tolist()  # used to get the labels of the pie chart.
+#myUnrepeatedEmotionsClassesList = np.unique(
+   # myRepeatedEmotionsListSorted).tolist()  # used to get the labels of the pie chart.
 
 repeatedEmotions = dict(
     Counter(myRepeatedEmotionsListSorted))  # Get the number of each type of emotions for every post.
@@ -64,28 +56,65 @@ numberOfNeutralSentiments = redditData[2].value_counts()['neutral']
 ##################################################################
 ##### This part is word embeddings.
 
-import gensim.downloader as api
-model=api.load('word2vec-google-news-300')
+text = redditPosts[:,0]
+tokenized_text = [word_tokenize(post) for post in text]
+number_of_tokens=len(sum(tokenized_text,[]))
+print('Total Number of tokens using tokenizer from nltk 2nd option: ',len(sum(tokenized_text,[])))
+# Loading the word2vec pretrained embedding model
+#model = api.load('word2vec-google-news-300')
+model_vector = api.load('word2vec-google-news-300')
 
-#dataSets = redditData[0]
-#print(loadedData[1])
-print(redditData[0])
-redditPosts=np.array(loadedData)
-#redditPosts=np.array2string(redditData[0])
-from nltk.tokenize import word_tokenize
-array=np.array2string(redditPosts[:,0])
-#tokenizer=word_tokenize(array)
-arrayNew=redditData[0].tolist()
 
-#' '.join(arrayNew)
-#print("".join(arrayNew))
-myNewJointList="".join(arrayNew)
-print(myNewJointList)
-#print(myNewJointList)
-tokenizer=word_tokenize(myNewJointList)
-#print(tokenizer)
-print('Total Number of tokens using tokenizer from nltk: ',len(tokenizer))
-X=list(model.wv.vcoba)
+
+words_vectors = []
+for sample in tokenized_text:
+   tokens_vec=[model_vector[word] for word in sample if word in model_vector]
+   words_vectors.append(tokens_vec)
+
+average_embeddings_posts=[]
+for word_vector_of_post in words_vectors:
+    for i in range(0, len(word_vector_of_post)):
+            #for x in word_vector_of_post[i]:
+              # sum = sum + x
+            average=np.array(word_vector_of_post[i])
+    average_embeddings_posts.append(average)
+
+np.save('embeddings.npy',average_embeddings_posts) # save all the embeddings to a numpy file.
+x = np.load('embeddings.npy')
+0
+
+           # average_embeddings_posts.append(np.array(word_vector_of_post[i]))
+              #  average_embeddings_posts.append(sum)
+           # np.array(word_vector_of_post[i]))
+       # average_embeddings_token.append(sum(word_vector_of_post[i]) / len(word_vector_of_post[i]))
+    #averageEmbedding_of_each_token=[]
+    #average_embeddings_posts
+
+average_embeddings_token
+#for i in range(0,len(word_vector_of_post)):
+ #   average_embeddings_token.append(sum(word_vector_of_post[i])/len(word_vector_of_post[i]))
+
+
+
+
+
+#for token in tokenized_text:
+ #   if(model_vector.most_similar(token)):
+        #store the
+  #      print("It is similar")
+        #list_embeddings_value.append(embedding)
+
+model_vector.most_similar('love')
+# Convert tokens into a list of integers
+#tokens_to_numbers = word_tokenize.convert_tokens_to_ids(tokenized_text)
+
+#word_vectors = model.wv     # loading the vectors
+#word_vectors.save("word2vec.wordvectors")
+#print(word_vectors)
+
+#post = gensim.models.word2vec.LineSentences(tokenized_text)
+#model.train(posts)
+#X=list(model.wv.vcoba)
 
 
 #corpus = np.array(loadedData)  # This returns a multidimensional array.
@@ -137,8 +166,6 @@ print("Total Number of Tokens: ", len(vectorizer.get_feature_names_out()))
 print('----------------------------------------------------')
 print('Multinomial Naive-Bayes for emotions:')
 Y = vectorizer.fit_transform(redditData[1])  # Y is the emotions label.
-from sklearn.preprocessing import LabelEncoder
-
 enc = LabelEncoder()
 
 Y = enc.fit_transform(redditData[1])
