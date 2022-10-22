@@ -14,15 +14,10 @@ from nltk.tokenize import word_tokenize
 from sklearn.preprocessing import LabelEncoder
 from statistics import mean
 import gensim.downloader as api
+from sklearn.neural_network import MLPClassifier
+
 performance = open('performance', 'w')
 performance.write("Part 2.4 of the mini project \n")
-# precision.write("Emotions: ")
-# precision.write("Confusion Matrix:")
-# precision.write("Multi-Layered Perceptron Classifier with default parameters, except the number of epochs:  \n")
-# precision.write("Precision: \n")
-# precision.write("Multi-Layered Perceptron Classifier Using GridSearchCv: \n")
-
-
 #pathToFile = "/Users/firdawsbouzeghaya/Desktop/geomotions_test-1.json"
 pathToFile = "/Users/firdawsbouzeghaya/Downloads/goemotions (1).json"
 
@@ -30,7 +25,6 @@ redditData = pd.read_json(pathToFile)
 file = open(pathToFile)
 loadedData = json.load(file)
 redditPosts = np.array(loadedData)
-
 
 sentimentClasses = ['positive', 'neutral', 'negative', 'ambiguous']
 myRepeatedEmotionsList = redditData[1]  # We first need to get the list of emotions from the data set
@@ -41,8 +35,6 @@ myUnrepeatedEmotionsClassesList = dict.fromkeys(myRepeatedEmotionsList)
 
 myRepeatedEmotionsListSorted = np.sort(myRepeatedEmotionsList)  # Used to sort the emotions' list by alphabetical order
 
-#myUnrepeatedEmotionsClassesList = np.unique(
-   # myRepeatedEmotionsListSorted).tolist()  # used to get the labels of the pie chart.
 
 repeatedEmotions = dict(
     Counter(myRepeatedEmotionsListSorted))  # Get the number of each type of emotions for every post.
@@ -52,75 +44,102 @@ numberOfNegativeSentiments = redditData[2].value_counts()['negative']
 numberOfAmbiguousSentiments = redditData[2].value_counts()['ambiguous']
 numberOfNeutralSentiments = redditData[2].value_counts()['neutral']
 
-
 ##################################################################
-##### This part is word embeddings.
+##### This is part 3: is word embeddings.
 
-text = redditPosts[:,0]
+text = redditPosts[:, 0]
 tokenized_text = [word_tokenize(post) for post in text]
-number_of_tokens=len(sum(tokenized_text,[]))
-print('Total Number of tokens using tokenizer from nltk 2nd option: ',len(sum(tokenized_text,[])))
+number_of_tokens = len(sum(tokenized_text, []))
+print('Total Number of tokens using tokenizer from nltk 2nd option: ', len(sum(tokenized_text, [])))
 # Loading the word2vec pretrained embedding model
-#model = api.load('word2vec-google-news-300')
+# model = api.load('word2vec-google-news-300')
 model_vector = api.load('word2vec-google-news-300')
 
-
-
 words_vectors = []
+count_number_of_words_found = 0
 for sample in tokenized_text:
-   tokens_vec=[model_vector[word] for word in sample if word in model_vector]
-   words_vectors.append(tokens_vec)
+    tokens_vec = [model_vector[word] for word in sample if word in model_vector]
+    for word in sample:
+        if word in model_vector:
+            count_number_of_words_found = count_number_of_words_found + 1
+    words_vectors.append(tokens_vec)
 
-average_embeddings_posts=[]
+average_embeddings_posts = []
 for word_vector_of_post in words_vectors:
     for i in range(0, len(word_vector_of_post)):
-            #for x in word_vector_of_post[i]:
-              # sum = sum + x
-            average=np.array(word_vector_of_post[i])
+        average = np.array(word_vector_of_post[i])
     average_embeddings_posts.append(average)
 
-np.save('embeddings.npy',average_embeddings_posts) # save all the embeddings to a numpy file.
+np.save('embeddings.npy', average_embeddings_posts)  # save all the embeddings to a numpy file.
 x = np.load('embeddings.npy')
-0
+overall_hit = (count_number_of_words_found / number_of_tokens)*100
+print(
+    "Overall hit rates of the training and test sets (% of words in the reddit post for which an embedding is found "
+    "in Word2Vec:  ", overall_hit)
 
-           # average_embeddings_posts.append(np.array(word_vector_of_post[i]))
-              #  average_embeddings_posts.append(sum)
-           # np.array(word_vector_of_post[i]))
-       # average_embeddings_token.append(sum(word_vector_of_post[i]) / len(word_vector_of_post[i]))
-    #averageEmbedding_of_each_token=[]
-    #average_embeddings_posts
+###### 3.5 Train a base MLP:
+## Emotions:
+vectorizer = CountVectorizer()
+Y = vectorizer.fit_transform(redditData[1])  # Y is the emotions label.
+enc = LabelEncoder()
+Y = enc.fit_transform(redditData[1])
+ndf = redditData
+ndf[1] = np.transpose(Y)
 
-average_embeddings_token
-#for i in range(0,len(word_vector_of_post)):
- #   average_embeddings_token.append(sum(word_vector_of_post[i])/len(word_vector_of_post[i]))
+X_embeddings_train, X_embeddings_test, Y_train, Y_test = train_test_split(x, Y, test_size=0.2)
+clf = MLPClassifier(max_iter=1)
+clf.fit(X_embeddings_train, Y_train)
+y_pred_MLP_embeddings_emotions = clf.predict(X_embeddings_test)
+print("Accuracy of the dataset using emotions as a target using Multi-Layered Perceptron with word embeddings is: ",
+      metrics.accuracy_score(Y_test, y_pred_MLP_embeddings_emotions))
+performance.write("Confusion Matrix of MLP using word embeddings for emotions:\n")
+print(confusion_matrix(Y_test, y_pred_MLP_embeddings_emotions, ), file=performance)
+performance.write("Classification report of MLP emotions: \n")
+print(classification_report(Y_test, y_pred_MLP_embeddings_emotions), file=performance)
 
+####### Sentiments:
+Z = enc.fit_transform(redditData[2])
+ndf = redditData
+ndf[2] = np.transpose(Z)
+X_embeddings_train, X_embeddings_test, Z_train, Z_test = train_test_split(x, Z, test_size=0.2)
+clf.fit(X_embeddings_train,Z_train)
+z_pred_MLP_embeddings_sentiments = clf.predict(X_embeddings_test)
+print("Accuracy of the dataset using sentiments as a target using Multi-Layered Perceptron with word embeddings is: ",
+      metrics.accuracy_score(Z_test, z_pred_MLP_embeddings_sentiments))
+performance.write("Confusion Matrix of MLP using word embeddings for sentiments:\n")
+print(confusion_matrix(Z_test, z_pred_MLP_embeddings_sentiments, ), file=performance)
+performance.write("Classification report of MLP sentiments: \n")
+print(classification_report(Z_test, z_pred_MLP_embeddings_sentiments), file=performance)
 
+# Top MLP
+# Emotions:
+print('Multi-Layered Perceptron using GridSearchCV: ')
+print('Multi-layered perceptron for emotions:')
+parameter_space = {'hidden_layer_sizes': [(30, 50), (10, 10, 10)],
+                   'activation': ['logistic', 'tanh', 'relu', 'identity'],
+                   'solver': ['adam', 'sgd']}
+mlf = GridSearchCV(clf, parameter_space)
+mlf.fit(X_embeddings_train, Y_train)
+y_pred_TopMLP_embeddings_emotions = mlf.predict(X_embeddings_test)
+print("Accuracy of the dataset using emotions as a target using Top Multi-Layered Perceptron with word embeddings is: ",
+      metrics.accuracy_score(Y_test, y_pred_TopMLP_embeddings_emotions))
+performance.write("Confusion Matrix of Top MLP using word embeddings for emotions:\n")
+print(confusion_matrix(Y_test, y_pred_TopMLP_embeddings_emotions, ), file=performance)
+performance.write("Classification report of Top MLP emotions: \n")
+print(classification_report(Y_test, y_pred_TopMLP_embeddings_emotions), file=performance)
 
+# Sentiments:
+mlf.fit(X_embeddings_train, Z_train)
+z_pred_TopMLP_embeddings_sentiments = mlf.predict(X_embeddings_test)
+print("Accuracy of the dataset using sentiments as a target using Top Multi-Layered Perceptron with word embeddings "
+      "is: ",
+      metrics.accuracy_score(Y_test, z_pred_TopMLP_embeddings_sentiments))
+performance.write("Confusion Matrix of Top MLP using word embeddings for sentiments:\n")
+print(confusion_matrix(Y_test, z_pred_TopMLP_embeddings_sentiments, ), file=performance)
+performance.write("Classification report of Top MLP sentiments: \n")
+print(classification_report(Y_test, z_pred_TopMLP_embeddings_sentiments), file=performance)
 
-
-#for token in tokenized_text:
- #   if(model_vector.most_similar(token)):
-        #store the
-  #      print("It is similar")
-        #list_embeddings_value.append(embedding)
-
-model_vector.most_similar('love')
-# Convert tokens into a list of integers
-#tokens_to_numbers = word_tokenize.convert_tokens_to_ids(tokenized_text)
-
-#word_vectors = model.wv     # loading the vectors
-#word_vectors.save("word2vec.wordvectors")
-#print(word_vectors)
-
-#post = gensim.models.word2vec.LineSentences(tokenized_text)
-#model.train(posts)
-#X=list(model.wv.vcoba)
-
-
-#corpus = np.array(loadedData)  # This returns a multidimensional array.
-#data=np.array2string(corpus)
-#print('Total Number of tokens using tokenizer from nltk 2nd option: ',len(word_tokenize(data)))
-
+# end of part three.
 ##############################################################################################
 
 
@@ -144,23 +163,11 @@ plt.title('Reddit Posts Sentiments Distribution.')
 plt.show()
 
 # Part Two:
-# Processing the dataset (idea 1) :
-#######################################################
-# corpus = np.array(loadedData)  # This returns a multidimensional array.
-# flatten_array = corpus.flatten()  # We need to transform our array to a one dimensional array.
-# vectorizer = CountVectorizer()  # Can we use DictVectorizer instead of count ?
-# X = vectorizer.fit_transform(flatten_array)
-# X.toarray()
-# print('The total number of tokens in the dataset is:', len(vectorizer.get_feature_names_out()))
-# Processing the dataset(idea to keep )
-######################################################
-# print(redditData)
 dataSets = redditData[0]
 vectorizer = CountVectorizer()
 X = vectorizer.fit_transform(dataSets)
 # print(vectorizer.get_feature_names_out())
 print("Total Number of Tokens: ", len(vectorizer.get_feature_names_out()))
-
 
 # Multinomial Naive-Bayes for Emotions:
 print('----------------------------------------------------')
@@ -215,8 +222,6 @@ print('----------------------------------------------------')
 # Emotions MLP
 print('Multi-Layered Perceptron for emotions: ')
 # Import MLPClassifer
-from sklearn.neural_network import MLPClassifier
-
 clf = MLPClassifier(max_iter=1)
 clf.fit(X_train, Y_train)
 y_pred_MLP_emotions = clf.predict(X_test)
@@ -300,7 +305,7 @@ print(classification_report(Y_test, y_pred_stopWords_MNB_emotions), file=perform
 # Multinomial Naive-Bayes for sentiments:
 print('----------------------------------------------------')
 print('Multinomial Naive-Bayes for sentiments:')
-mnb.fit(X_train_stopWords,Y_train)
+mnb.fit(X_train_stopWords, Y_train)
 y_pred_stopWords_MNB_sentiments = mnb.predict(X_test_stopWords)
 print(y_pred_stopWords_MNB_sentiments)
 print("Accuracy of the dataset using sentiments as a target using Multinomial Naive-Bayes is: ",
@@ -365,8 +370,9 @@ print('----------------------------------------------------')
 ############################################################
 # Part 3: Embeddings as features:
 # 3.1 Use gensim.downloader.load to load the word2vec-google-new-300 pre-trained embedding model
-import gensim.downloader as api
-model=api.load('word2vec-google-news-300')
+
+
+# model = api.load('word2vec-google-news-300')
 # 3.2 Use Tokenizer to extract words from the reddit posts and display the number of tokens in the training set
 
 
