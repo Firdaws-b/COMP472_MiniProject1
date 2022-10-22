@@ -5,8 +5,6 @@ import gensim.downloader as api
 from nltk import word_tokenize
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.neural_network import MLPClassifier
-
-model=api.load('word2vec-google-news-300')
 import datasets as dataSets
 import numpy as np
 import json
@@ -33,14 +31,14 @@ from sklearn.feature_extraction import DictVectorizer
 
 
 pathToFile = "/Users/kawtherbouzeghaya/Downloads/goemotions.json"
+#pathToFile = "/Users/kawtherbouzeghaya/Desktop/testData.json"
 redditData = pd.read_json(pathToFile)
 file = open(pathToFile)
 loadedData = json.load(file)
 redditPosts = np.array(loadedData)
 sentimentClasses = ['positive', 'neutral', 'negative', 'ambiguous']
 # create a file that contains all the information.
-#performance = open("/Users/kawtherbouzeghaya/Desktop/COMP472_MiniProject1/performance.txt",'w')
-performance = open("/Users/kawtherbouzeghaya/Desktop/testData",'w')
+performance = open("/Users/kawtherbouzeghaya/Desktop/COMP472_MiniProject1/performance.txt",'w')
 myRepeatedEmotionsList = redditData[1]  # We first need to get the list of emotions from the data set
 # Then we will need to remove the repeated values and convert the list back.
 
@@ -65,6 +63,7 @@ numberOfAmbiguousSentiments = redditData[2].value_counts()['ambiguous']
 numberOfNeutralSentiments = redditData[2].value_counts()['neutral']
 
 #---------------------------------------------------------------------------
+
 # Part One
 # Labels
 sentimentClassesData = [numberOfPositiveSentiments, numberOfNegativeSentiments, numberOfAmbiguousSentiments,
@@ -89,7 +88,6 @@ plt.show()
 dataSets = redditData[0]
 vectorizer = CountVectorizer()
 vectorizer.fit_transform(dataSets)
-print("Tokens: ", vectorizer.vocabulary_)
 X = vectorizer.fit_transform(dataSets)
 print("Total Number of Tokens: ", len(vectorizer.get_feature_names_out()))
 
@@ -181,7 +179,22 @@ print("Accuracy of the dataset using sentiments as a target using Multi-Layered 
 
 #---------------------------2.3.4 TOP MNB:----------------------
 # Emotions:
+print("------- TOP NB hyper parameters for emotions ---------")
+parametersGrid = {'alpha': [0.5, 0, 2, 1, 0.75]}
+grida = GridSearchCV(mnb, param_grid=parametersGrid, cv=5)
+grida.fit(X_train, Y_train)
+emotionsTopMNBprediction = grida.predict(X_test)
+print("Emotion MNB best score is ", grida.best_score_)
+print("Emotion MNB best hyper parameter is ", grida.best_params_)
+
 # Sentiments:
+print("------- TOP NB hyper parameters for emotions ---------")
+parametersGrid = {'alpha': [0.5, 0, 2, 1, 0.75]}
+gridb = GridSearchCV(mnb, param_grid=parametersGrid, cv=5)
+gridb.fit(X_train, Z_train)
+sentimentTopMNBprediction = gridb.predict(X_test)
+print("Emotion MNB best score is ", gridb.best_score_)
+print("Emotion MNB best hyper parameter is ", gridb.best_params_)
 #---------------------------------------------------------------
 
 #---------------------------2.3.5 TOP DT------------------------
@@ -240,6 +253,15 @@ performance.write("Confusion Matrix of MNB emotions:\n")
 print(confusion_matrix(Y_test, y_pred_MNB_emotions), file=performance)
 performance.write("Classification report of MNB emotions: \n")
 print(classification_report(Y_test, y_pred_MNB_emotions), file=performance)
+performance.write("\n")
+performance.write("Top MNB confusion matrix:\n ")
+print(confusion_matrix(Y_test,emotionsTopMNBprediction),file = performance)
+performance.write("\n")
+performance.write("Top MNB Classification report:\n")
+print(classification_report(Y_test,emotionsTopMNBprediction), file=performance)
+performance.write("\n")
+performance.write("---------------------------------------------------------------------")
+performance.write("\n")
 
 # Sentiments:
 performance.write("---------------------------------------------------------------\n")
@@ -250,6 +272,17 @@ performance.write("Confusion Matrix of MNB sentiments:\n")
 print(confusion_matrix(Z_test, z_pred_sentiments_MNB), file=performance)
 performance.write("Classification report of MNB sentiments: \n")
 print(classification_report(Z_test, z_pred_sentiments_MNB), file=performance)
+performance.write("\n")
+performance.write("Base DT Classification report:\n")
+print(classification_report(Z_test,sentimentTopMNBprediction),file = performance)
+performance.write("\n")
+performance.write("Top DT confusion matrix\n")
+print(confusion_matrix(Z_test,sentimentTopMNBprediction),file = performance)
+performance.write("\n")
+performance.write("Top DT Classification report:\n")
+print(classification_report(Z_test,sentimentTopMNBprediction), file=performance)
+performance.write("\n")
+performance.write("---------------------------------------------------------------------")
 #---------------------------------------------------------------
 
 #---------------------------2.4.2  DT:--------------------------
@@ -375,7 +408,21 @@ print(confusion_matrix(Y_test, y_pred_stopWords_MNB_emotions), file=performance)
 performance.write("Classification report of MNB emotions with english stop words: \n")
 print(classification_report(Y_test, y_pred_stopWords_MNB_emotions), file=performance)
 
+#Top
+performance.write("Emotions Top MNB: \n")
+print("Top MNB for emotions using english stop words: ")
+grida.fit(X_train_stopWords,Y_train)
+emotionsTopMNBStopWords = grida.predict(X_test_stopWords)
+print("Accuracy of the dataset using emotions as a target and Top MNB is ", metrics.accuracy_score(Y_test,emotionsTopMNBStopWords))
+performance.write("Confusion Matrix of TMNB emotions using english stop words: \n")
+print(confusion_matrix(Y_test, emotionsTopMNBStopWords), file=performance)
+performance.write("Classification report for emotions using english stop words:\n")
+print(classification_report(Y_test,emotionsTopMNBStopWords), file=performance)
+performance.write("\n")
+performance.write("----------------------------------------------------------------------")
+
 # Sentiments:
+# Base
 print('----------------------------------------------------')
 print('Multinomial Naive-Bayes for sentiments:')
 mnb.fit(X_train_stopWords,Y_train)
@@ -390,6 +437,18 @@ performance.write("Classification report of MNB sentiments with english stop wor
 print(classification_report(Y_test, y_pred_stopWords_MNB_sentiments), file=performance)
 print('----------------------------------------------------')
 
+# Top
+performance.write("Sentiments Top MNB")
+print("Top MNB for sentiments using english stop words: ")
+gridb.fit(X_train_stopWords,Z_train)
+sentimentTopMNBStopWords = gridb.predict(X_test_stopWords)
+print("Accuracy of the dataset using sentiments as a target and Top MNB is", metrics.accuracy_score(Z_test,sentimentTopMNBStopWords))
+performance.write("Confusion Matrix of TMNB sentiments using english stop words: \n")
+print(confusion_matrix(Z_test,sentimentTopMNBStopWords), file=performance)
+performance.write("Classification report for sentiments using english stop words:\n")
+print(classification_report(Z_test,sentimentTopMNBStopWords), file=performance)
+performance.write("\n")
+performance.write("--------------------------------------------------------------------")
 #---------------------------------------------------------------
 
 #---------------------------2.5.2 DT:--------------------------
@@ -444,7 +503,6 @@ performance.write("Classification report for sentiments using english stop words
 print(classification_report(Z_test,sentimentTopDecisionTreeStopWords), file=performance)
 performance.write("\n")
 performance.write("--------------------------------------------------------------------")
-
 #---------------------------------------------------------------
 
 #---------------------------2.5.3 MLP:--------------------------
@@ -503,12 +561,172 @@ print(classification_report(Z_test, z_pred_sentiments_TopMLP_stopWords), file=pe
 print('----------------------------------------------------')
 
 # Part Three: Embeddings as Features:
-array=np.array2string(redditPosts[:,0])
-arrayNew=redditData[0].tolist()
-myNewJointList="".join(arrayNew)
-print(myNewJointList)
-tokenizer=word_tokenize(myNewJointList)
-print('Total Number of tokens using tokenizer from nltk: ',len(tokenizer))
-X=list(model.wv.vcoba)
+
+# 3.2
+text = redditPosts[:, 0]
+tokenized_text = [word_tokenize(post) for post in text]
+number_of_tokens = len(sum(tokenized_text, []))
+print('Total Number of tokens using tokenizer from nltk 2nd option: ', len(sum(tokenized_text, [])))
+# Loading the word2vec pretrained embedding model
+model_vector = api.load('word2vec-google-news-300')
+
+# 3.3 & 3.4  compute the embeddings and display them.
+words_vectors = []
+count_number_of_words_found = 0
+for sample in tokenized_text:
+    tokens_vec = [model_vector[word] for word in sample if word in model_vector]
+    for word in sample:
+        if word in model_vector:
+            count_number_of_words_found = count_number_of_words_found + 1
+    words_vectors.append(tokens_vec)
+
+average_embeddings_posts = []
+for word_vector_of_post in words_vectors:
+    for i in range(0, len(word_vector_of_post)):
+        average = np.array(word_vector_of_post[i])
+    average_embeddings_posts.append(average)
+
+np.save('embeddings.npy', average_embeddings_posts)  # save all the embeddings to a numpy file.
+x = np.load('embeddings.npy')
+overall_hit = (count_number_of_words_found / number_of_tokens)*100
+print(
+    "Overall hit rates of the training and test sets (% of words in the reddit post for which an embedding is found "
+    "in Word2Vec:  ", overall_hit)
+
+# 3.5 and 3.7 Train a base MLP
+# Emotions
+X_embeddings_train, X_embeddings_test, Y_train, Y_test = train_test_split(x, Y, test_size=0.2)
+clf = MLPClassifier(max_iter=1)
+clf.fit(X_embeddings_train, Y_train)
+y_pred_MLP_embeddings_emotions = clf.predict(X_embeddings_test)
+print("Accuracy of the dataset using emotions as a target using Multi-Layered Perceptron with word embeddings is: ",
+      metrics.accuracy_score(Y_test, y_pred_MLP_embeddings_emotions))
+performance.write("Confusion Matrix of MLP using word embeddings for emotions:\n")
+print(confusion_matrix(Y_test, y_pred_MLP_embeddings_emotions, ), file=performance)
+performance.write("Classification report of MLP emotions: \n")
+print(classification_report(Y_test, y_pred_MLP_embeddings_emotions), file=performance)
+
+# Sentiments
+X_embeddings_train, X_embeddings_test, Z_train, Z_test = train_test_split(x, Z, test_size=0.2)
+clf.fit(X_embeddings_train,Z_train)
+z_pred_MLP_embeddings_sentiments = clf.predict(X_embeddings_test)
+print("Accuracy of the dataset using sentiments as a target using Multi-Layered Perceptron with word embeddings is: ",
+      metrics.accuracy_score(Z_test, z_pred_MLP_embeddings_sentiments))
+performance.write("Confusion Matrix of MLP using word embeddings for sentiments:\n")
+print(confusion_matrix(Z_test, z_pred_MLP_embeddings_sentiments, ), file=performance)
+performance.write("Classification report of MLP sentiments: \n")
+print(classification_report(Z_test, z_pred_MLP_embeddings_sentiments), file=performance)
+
+# 3.6 Train a Top MLP
+# Emotions:
+mlf.fit(X_embeddings_train, Y_train)
+y_pred_TopMLP_embeddings_emotions = mlf.predict(X_embeddings_test)
+print("Accuracy of the dataset using emotions as a target using Top Multi-Layered Perceptron with word embeddings is: ",
+      metrics.accuracy_score(Y_test, y_pred_TopMLP_embeddings_emotions))
+performance.write("Confusion Matrix of Top MLP using word embeddings for emotions:\n")
+print(confusion_matrix(Y_test, y_pred_TopMLP_embeddings_emotions, ), file=performance)
+performance.write("Classification report of Top MLP emotions: \n")
+print(classification_report(Y_test, y_pred_TopMLP_embeddings_emotions), file=performance)
+
+# Sentiments
+mlf.fit(X_embeddings_train, Z_train)
+z_pred_TopMLP_embeddings_sentiments = mlf.predict(X_embeddings_test)
+print("Accuracy of the dataset using sentiments as a target using Top Multi-Layered Perceptron with word embeddings "
+      "is: ",
+      metrics.accuracy_score(Y_test, z_pred_TopMLP_embeddings_sentiments))
+performance.write("Confusion Matrix of Top MLP using word embeddings for sentiments:\n")
+print(confusion_matrix(Y_test, z_pred_TopMLP_embeddings_sentiments, ), file=performance)
+performance.write("Classification report of Top MLP sentiments: \n")
+print(classification_report(Y_test, z_pred_TopMLP_embeddings_sentiments), file=performance)
+
+# 3.8 Run the best performing model with two other english pretrained models:
+# Using glove-wiki-gigaword-50
+model_vector_glove_wiki_gigaword_50 = api.load('glove-wiki-gigaword-50')
+words_vectors_glove_wiki = []
+for sample_2 in tokenized_text:
+    tokens_vec_2 = [model_vector_glove_wiki_gigaword_50[word] for word in sample_2 if word in model_vector_glove_wiki_gigaword_50]
+    words_vectors_glove_wiki.append(tokens_vec_2)
+
+average_embeddings_posts_model2 = []
+for word_vector_of_post_model2 in words_vectors_glove_wiki:
+    for i in range(0, len(word_vector_of_post_model2)):
+        average = np.array(word_vector_of_post_model2[i])
+    average_embeddings_posts_model2.append(average)
+
+np.save('embeddings_glove_wiki.npy', average_embeddings_posts_model2)  # save all the embeddings to a numpy file.
+x_model2 = np.load('embeddings_glove_wiki.npy')
+# Train MLP:
+# emotions:
+X_embeddings_2_train, X_embeddings_2_test, Y_train, Y_test = train_test_split(x_model2, Y, test_size=0.2)
+clf = MLPClassifier(max_iter=1)
+clf.fit(X_embeddings_2_train, Y_train)
+y_pred_MLP_embeddings2_emotions = clf.predict(X_embeddings_2_test)
+print("Accuracy of the dataset using emotions as a target using Multi-Layered Perceptron with word embeddings model "
+      "glove-wiki-gigaword-50 is: ",
+      metrics.accuracy_score(Y_test, y_pred_MLP_embeddings2_emotions))
+performance.write("Confusion Matrix of MLP using word embeddings pretrained model glove-wiki-gigaword-50 for emotions:\n")
+print(confusion_matrix(Y_test, y_pred_MLP_embeddings2_emotions, ), file=performance)
+performance.write("Classification report of MLP emotions: \n")
+print(classification_report(Y_test, y_pred_MLP_embeddings2_emotions), file=performance)
+
+# sentiments:
+X_embeddings_2_train, X_embeddings_2_test, Z_train, Z_test = train_test_split(x_model2, Y, test_size=0.2)
+clf.fit(X_embeddings_2_train, Y_train)
+z_pred_MLP_embeddings2_sentiments = clf.predict(X_embeddings_2_test)
+print("Accuracy of the dataset using sentiments as a target using Multi-Layered Perceptron with word embeddings model "
+      "glove-wiki-gigaword-50 is: ",
+      metrics.accuracy_score(Z_test, z_pred_MLP_embeddings2_sentiments))
+performance.write("Confusion Matrix of MLP using word embeddings pretrained model glove-wiki-gigaword-50 for sentiments:\n")
+print(confusion_matrix(Z_test, z_pred_MLP_embeddings2_sentiments, ), file=performance)
+performance.write("Classification report of MLP sentiments: \n")
+print(classification_report(Z_test, z_pred_MLP_embeddings2_sentiments), file=performance)
+
+##############################################################################################
+# Model 3: Using glove-twitter-25
+# Getting the embeddings:
+model_vector_glove_twitter_25 = api.load('glove-twitter-25')
+words_vectors_glove_twitter_25 = []
+for sample_3 in tokenized_text:
+    tokens_vec_3 = [model_vector_glove_twitter_25[word] for word in sample_3 if word in model_vector_glove_twitter_25]
+    words_vectors_glove_twitter_25.append(tokens_vec_3)
+
+average_embeddings_posts_model3 = []
+for word_vector_of_post_model3 in words_vectors_glove_twitter_25:
+    for i in range(0, len(word_vector_of_post_model3)):
+        average = np.array(word_vector_of_post_model3[i])
+    average_embeddings_posts_model3.append(average)
+
+np.save('embeddings_glove_twitter.npy', average_embeddings_posts_model3)  # save all the embeddings to a numpy file.
+x_model3 = np.load('embeddings_glove_twitter.npy')
+
+# Train the models
+# MLP
+# emotions:
+X_embeddings_3_train, X_embeddings_3_test, Y_train, Y_test = train_test_split(x_model3, Y, test_size=0.2)
+clf = MLPClassifier(max_iter=1)
+clf.fit(X_embeddings_3_train, Y_train)
+y_pred_MLP_embeddings3_emotions = clf.predict(X_embeddings_3_test)
+print("Accuracy of the dataset using emotions as a target using Multi-Layered Perceptron with pretrained model "
+      "glove-twitter-25 is: ",
+      metrics.accuracy_score(Y_test, y_pred_MLP_embeddings2_emotions))
+performance.write("Confusion Matrix of MLP using word embeddings with pretrained model glove-twitter-25 for "
+                  "emotions:\n")
+print(confusion_matrix(Y_test, y_pred_MLP_embeddings3_emotions, ), file=performance)
+performance.write("Classification report of MLP emotions: \n")
+print(classification_report(Y_test, y_pred_MLP_embeddings3_emotions), file=performance)
+
+# sentiments:
+X_embeddings_3_train, X_embeddings_3_test, Z_train, Z_test = train_test_split(x_model3, Y, test_size=0.2)
+clf.fit(X_embeddings_3_train, Y_train)
+z_pred_MLP_embeddings3_sentiments = clf.predict(X_embeddings_3_test)
+print("Accuracy of the dataset using sentiments as a target using Multi-Layered Perceptron with pretrained embeddings model "
+      "glove-twitter-25 is: ",
+      metrics.accuracy_score(Z_test, z_pred_MLP_embeddings3_sentiments))
+performance.write("Confusion Matrix of MLP using pretrained embedding model glove-twitter-25 for sentiments:\n")
+print(confusion_matrix(Z_test, z_pred_MLP_embeddings3_sentiments, ), file=performance)
+performance.write("Classification report of MLP sentiments: \n")
+print(classification_report(Z_test, z_pred_MLP_embeddings3_sentiments), file=performance)
+
+performance.close()
 #---------------------------------------------------------------
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
