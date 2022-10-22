@@ -35,6 +35,8 @@ numberOfNegativeSentiments = redditData[2].value_counts()['negative']
 numberOfAmbiguousSentiments = redditData[2].value_counts()['ambiguous']
 numberOfNeutralSentiments = redditData[2].value_counts()['neutral']
 
+
+
 #---------------------------------------------------------------------------
 
 # Part One
@@ -608,9 +610,9 @@ print("Accuracy of the dataset using sentiments as a target using Top Multi-Laye
       "is: ",
       metrics.accuracy_score(Y_test, z_pred_TopMLP_embeddings_sentiments))
 performance.write("Confusion Matrix of Top MLP using word embeddings for sentiments:\n")
-print(confusion_matrix(Y_test, z_pred_TopMLP_embeddings_sentiments, ), file=performance)
+print(confusion_matrix(Z_test, z_pred_TopMLP_embeddings_sentiments, ), file=performance)
 performance.write("Classification report of Top MLP sentiments: \n")
-print(classification_report(Y_test, z_pred_TopMLP_embeddings_sentiments), file=performance)
+print(classification_report(Z_test, z_pred_TopMLP_embeddings_sentiments), file=performance)
 
 # 3.8 Run the best performing model with two other english pretrained models:
 # Using glove-wiki-gigaword-50
@@ -643,7 +645,7 @@ performance.write("Classification report of MLP emotions: \n")
 print(classification_report(Y_test, y_pred_MLP_embeddings2_emotions), file=performance)
 
 # sentiments:
-X_embeddings_2_train, X_embeddings_2_test, Z_train, Z_test = train_test_split(x_model2, Y, test_size=0.2)
+X_embeddings_2_train, X_embeddings_2_test, Z_train, Z_test = train_test_split(x_model2, Z, test_size=0.2)
 clf.fit(X_embeddings_2_train, Y_train)
 z_pred_MLP_embeddings2_sentiments = clf.predict(X_embeddings_2_test)
 print("Accuracy of the dataset using sentiments as a target using Multi-Layered Perceptron with word embeddings model "
@@ -689,7 +691,7 @@ performance.write("Classification report of MLP emotions: \n")
 print(classification_report(Y_test, y_pred_MLP_embeddings3_emotions), file=performance)
 
 # sentiments:
-X_embeddings_3_train, X_embeddings_3_test, Z_train, Z_test = train_test_split(x_model3, Y, test_size=0.2)
+X_embeddings_3_train, X_embeddings_3_test, Z_train, Z_test = train_test_split(x_model3, Z, test_size=0.2)
 clf.fit(X_embeddings_3_train, Y_train)
 z_pred_MLP_embeddings3_sentiments = clf.predict(X_embeddings_3_test)
 print("Accuracy of the dataset using sentiments as a target using Multi-Layered Perceptron with pretrained embeddings model "
@@ -702,4 +704,3 @@ print(classification_report(Z_test, z_pred_MLP_embeddings3_sentiments), file=per
 
 performance.close()
 #---------------------------------------------------------------
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
