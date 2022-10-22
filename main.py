@@ -1,37 +1,21 @@
-# This is a sample Python script.
-import sys
-from collections import OrderedDict
 import gensim.downloader as api
 from nltk import word_tokenize
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.neural_network import MLPClassifier
-import datasets as dataSets
 import numpy as np
 import json
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 import pandas as pd
 import gensim
 import nltk
 from matplotlib import pyplot as plt
 from collections import Counter
-
-from matplotlib.pyplot import clf
 from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn import tree, metrics, decomposition, svm
 from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV
-#np.set_printoptions(threshold=sys.maxsize)
 from sklearn.feature_extraction.text import CountVectorizer
 
-from sklearn.feature_extraction import DictVectorizer
-# from pandas.io import json
-
-
 pathToFile = "/Users/kawtherbouzeghaya/Downloads/goemotions.json"
-#pathToFile = "/Users/kawtherbouzeghaya/Desktop/testData.json"
 redditData = pd.read_json(pathToFile)
 file = open(pathToFile)
 loadedData = json.load(file)
@@ -41,21 +25,10 @@ sentimentClasses = ['positive', 'neutral', 'negative', 'ambiguous']
 performance = open("/Users/kawtherbouzeghaya/Desktop/COMP472_MiniProject1/performance.txt",'w')
 myRepeatedEmotionsList = redditData[1]  # We first need to get the list of emotions from the data set
 # Then we will need to remove the repeated values and convert the list back.
-
 myUnrepeatedEmotionsClassesList = dict.fromkeys(myRepeatedEmotionsList)
-
 myRepeatedEmotionsListSorted = np.sort(myRepeatedEmotionsList)  # Used to sort the emotions' list by alphabetical order
-
-myUnrepeatedEmotionsClassesList = np.unique(
-    myRepeatedEmotionsListSorted).tolist()  # used to get the labels of the pie chart.
-
 repeatedEmotions = dict(
     Counter(myRepeatedEmotionsListSorted))  # Get the number of each type of emotions for every post.
-
-# At first I created the histogram, but it was too ugly :( so I had to switch to pie charts !
-# plt.hist(myRepeatedEmotionsList,bins=28)
-# plt.show()
-
 
 numberOfPositiveSentiments = redditData[2].value_counts()['positive']
 numberOfNegativeSentiments = redditData[2].value_counts()['negative']
