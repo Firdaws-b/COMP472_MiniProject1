@@ -294,7 +294,7 @@ performance.write("\n")
 performance.write("Accuracy(without criterion) : ")
 performance.write(str(metrics.accuracy_score(Z_test, sentimentBaseDecisionTreePrediction)))
 performance.write("\n")
-performance.write("Best hyper parameters" ),
+performance.write("Best hyper parameters" )
 performance.write(str(grid2.best_params_))
 performance.write("\n")
 performance.write("Best Score "),
@@ -327,7 +327,7 @@ performance.write(str(metrics.accuracy_score(Y_test, y_pred_TopMLP_emotions)))
 performance.write("\n")
 # Implementation of Confusion Matrix of MLP:base
 performance.write("Confusion Matrix of base MLP emotions:\n")
-print(confusion_matrix(Y_test, y_pred_MLP_emotions, ), file=performance)
+print(confusion_matrix(Y_test, y_pred_MLP_emotions), file=performance)
 # Classification report.
 performance.write("Classification report of base MLP emotions: \n")
 print(classification_report(Y_test, y_pred_MLP_emotions), file=performance)
@@ -490,7 +490,7 @@ y_pred_MLP_emotions_stopWords = clf.predict(X_test_stopWords)
 print("Accuracy of the dataset using emotions as a target using Base Multi-Layered Perceptron is: ",
       metrics.accuracy_score(Y_test, y_pred_MLP_emotions_stopWords))
 performance.write("Confusion Matrix of Base MLP emotions using english stop words:\n")
-print(confusion_matrix(Y_test, y_pred_MLP_emotions_stopWords, ), file=performance)
+print(confusion_matrix(Y_test, y_pred_MLP_emotions_stopWords), file=performance)
 performance.write("Classification report of Base MLP emotions using english stop words: \n")
 print(classification_report(Y_test, y_pred_MLP_emotions_stopWords), file=performance)
 print('----------------------------------------------------')
@@ -577,7 +577,7 @@ y_pred_MLP_embeddings_emotions = clf.predict(X_embeddings_test)
 print("Accuracy of the dataset using emotions as a target using Multi-Layered Perceptron with word embeddings is: ",
       metrics.accuracy_score(Y_test, y_pred_MLP_embeddings_emotions))
 performance.write("Confusion Matrix of MLP using word embeddings for emotions:\n")
-print(confusion_matrix(Y_test, y_pred_MLP_embeddings_emotions, ), file=performance)
+print(confusion_matrix(Y_test, y_pred_MLP_embeddings_emotions ), file=performance)
 performance.write("Classification report of MLP emotions: \n")
 print(classification_report(Y_test, y_pred_MLP_embeddings_emotions), file=performance)
 
@@ -588,7 +588,7 @@ z_pred_MLP_embeddings_sentiments = clf.predict(X_embeddings_test)
 print("Accuracy of the dataset using sentiments as a target using Multi-Layered Perceptron with word embeddings is: ",
       metrics.accuracy_score(Z_test, z_pred_MLP_embeddings_sentiments))
 performance.write("Confusion Matrix of MLP using word embeddings for sentiments:\n")
-print(confusion_matrix(Z_test, z_pred_MLP_embeddings_sentiments, ), file=performance)
+print(confusion_matrix(Z_test, z_pred_MLP_embeddings_sentiments ), file=performance)
 performance.write("Classification report of MLP sentiments: \n")
 print(classification_report(Z_test, z_pred_MLP_embeddings_sentiments), file=performance)
 
@@ -599,7 +599,7 @@ y_pred_TopMLP_embeddings_emotions = mlf.predict(X_embeddings_test)
 print("Accuracy of the dataset using emotions as a target using Top Multi-Layered Perceptron with word embeddings is: ",
       metrics.accuracy_score(Y_test, y_pred_TopMLP_embeddings_emotions))
 performance.write("Confusion Matrix of Top MLP using word embeddings for emotions:\n")
-print(confusion_matrix(Y_test, y_pred_TopMLP_embeddings_emotions, ), file=performance)
+print(confusion_matrix(Y_test, y_pred_TopMLP_embeddings_emotions ), file=performance)
 performance.write("Classification report of Top MLP emotions: \n")
 print(classification_report(Y_test, y_pred_TopMLP_embeddings_emotions), file=performance)
 
@@ -608,9 +608,9 @@ mlf.fit(X_embeddings_train, Z_train)
 z_pred_TopMLP_embeddings_sentiments = mlf.predict(X_embeddings_test)
 print("Accuracy of the dataset using sentiments as a target using Top Multi-Layered Perceptron with word embeddings "
       "is: ",
-      metrics.accuracy_score(Y_test, z_pred_TopMLP_embeddings_sentiments))
+      metrics.accuracy_score(Z_test, z_pred_TopMLP_embeddings_sentiments))
 performance.write("Confusion Matrix of Top MLP using word embeddings for sentiments:\n")
-print(confusion_matrix(Z_test, z_pred_TopMLP_embeddings_sentiments, ), file=performance)
+print(confusion_matrix(Z_test, z_pred_TopMLP_embeddings_sentiments ), file=performance)
 performance.write("Classification report of Top MLP sentiments: \n")
 print(classification_report(Z_test, z_pred_TopMLP_embeddings_sentiments), file=performance)
 
@@ -640,19 +640,19 @@ print("Accuracy of the dataset using emotions as a target using Multi-Layered Pe
       "glove-wiki-gigaword-50 is: ",
       metrics.accuracy_score(Y_test, y_pred_MLP_embeddings2_emotions))
 performance.write("Confusion Matrix of MLP using word embeddings pretrained model glove-wiki-gigaword-50 for emotions:\n")
-print(confusion_matrix(Y_test, y_pred_MLP_embeddings2_emotions, ), file=performance)
+print(confusion_matrix(Y_test, y_pred_MLP_embeddings2_emotions ), file=performance)
 performance.write("Classification report of MLP emotions: \n")
 print(classification_report(Y_test, y_pred_MLP_embeddings2_emotions), file=performance)
 
 # sentiments:
 X_embeddings_2_train, X_embeddings_2_test, Z_train, Z_test = train_test_split(x_model2, Z, test_size=0.2)
-clf.fit(X_embeddings_2_train, Y_train)
+clf.fit(X_embeddings_2_train, Z_train)
 z_pred_MLP_embeddings2_sentiments = clf.predict(X_embeddings_2_test)
 print("Accuracy of the dataset using sentiments as a target using Multi-Layered Perceptron with word embeddings model "
       "glove-wiki-gigaword-50 is: ",
       metrics.accuracy_score(Z_test, z_pred_MLP_embeddings2_sentiments))
 performance.write("Confusion Matrix of MLP using word embeddings pretrained model glove-wiki-gigaword-50 for sentiments:\n")
-print(confusion_matrix(Z_test, z_pred_MLP_embeddings2_sentiments, ), file=performance)
+print(confusion_matrix(Z_test, z_pred_MLP_embeddings2_sentiments ), file=performance)
 performance.write("Classification report of MLP sentiments: \n")
 print(classification_report(Z_test, z_pred_MLP_embeddings2_sentiments), file=performance)
 
@@ -683,22 +683,22 @@ clf.fit(X_embeddings_3_train, Y_train)
 y_pred_MLP_embeddings3_emotions = clf.predict(X_embeddings_3_test)
 print("Accuracy of the dataset using emotions as a target using Multi-Layered Perceptron with pretrained model "
       "glove-twitter-25 is: ",
-      metrics.accuracy_score(Y_test, y_pred_MLP_embeddings2_emotions))
+      metrics.accuracy_score(Y_test, y_pred_MLP_embeddings3_emotions))
 performance.write("Confusion Matrix of MLP using word embeddings with pretrained model glove-twitter-25 for "
                   "emotions:\n")
-print(confusion_matrix(Y_test, y_pred_MLP_embeddings3_emotions, ), file=performance)
+print(confusion_matrix(Y_test, y_pred_MLP_embeddings3_emotions), file=performance)
 performance.write("Classification report of MLP emotions: \n")
 print(classification_report(Y_test, y_pred_MLP_embeddings3_emotions), file=performance)
 
 # sentiments:
 X_embeddings_3_train, X_embeddings_3_test, Z_train, Z_test = train_test_split(x_model3, Z, test_size=0.2)
-clf.fit(X_embeddings_3_train, Y_train)
+clf.fit(X_embeddings_3_train, Z_train)
 z_pred_MLP_embeddings3_sentiments = clf.predict(X_embeddings_3_test)
 print("Accuracy of the dataset using sentiments as a target using Multi-Layered Perceptron with pretrained embeddings model "
       "glove-twitter-25 is: ",
       metrics.accuracy_score(Z_test, z_pred_MLP_embeddings3_sentiments))
 performance.write("Confusion Matrix of MLP using pretrained embedding model glove-twitter-25 for sentiments:\n")
-print(confusion_matrix(Z_test, z_pred_MLP_embeddings3_sentiments, ), file=performance)
+print(confusion_matrix(Z_test, z_pred_MLP_embeddings3_sentiments ), file=performance)
 performance.write("Classification report of MLP sentiments: \n")
 print(classification_report(Z_test, z_pred_MLP_embeddings3_sentiments), file=performance)
 
