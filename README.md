@@ -19,6 +19,6 @@ To run this file:
 - analysis.pdf -> Analysis of the results
 # Team: Powerpuff Girls 
 # Contributors: 
-- Shangirna Rajaratnam
-- Firdaws Bouzeghaya 
-- Kawther Bouzeghaya
+- Firdaws Bouzeghaya : Firdaws-b (Team leader)
+- Shangirna Rajaratnam : Shangirna
+- Kawther Bouzeghaya : fluffyCookie0
