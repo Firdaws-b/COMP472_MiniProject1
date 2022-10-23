@@ -15,14 +15,14 @@ from sklearn import tree, metrics, decomposition, svm
 from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV
 from sklearn.feature_extraction.text import CountVectorizer
 
-pathToFile = "/Users/kawtherbouzeghaya/Downloads/goemotions.json"
+pathToFile = "goemotions.json"
 redditData = pd.read_json(pathToFile)
 file = open(pathToFile)
 loadedData = json.load(file)
 redditPosts = np.array(loadedData)
 sentimentClasses = ['positive', 'neutral', 'negative', 'ambiguous']
 # create a file that contains all the information.
-performance = open("/Users/kawtherbouzeghaya/Desktop/COMP472_MiniProject1/performance.txt",'w')
+performance = open("performance.txt",'w')
 myRepeatedEmotionsList = redditData[1]  # We first need to get the list of emotions from the data set
 # Then we will need to remove the repeated values and convert the list back.
 myUnrepeatedEmotionsClassesList = dict.fromkeys(myRepeatedEmotionsList)
@@ -400,16 +400,16 @@ performance.write("-------------------------------------------------------------
 # Base
 print('----------------------------------------------------')
 print('Multinomial Naive-Bayes for sentiments:')
-mnb.fit(X_train_stopWords,Y_train)
+mnb.fit(X_train_stopWords,Z_train)
 y_pred_stopWords_MNB_sentiments = mnb.predict(X_test_stopWords)
 print(y_pred_stopWords_MNB_sentiments)
 print("Accuracy of the dataset using sentiments as a target using Multinomial Naive-Bayes is: ",
-      metrics.accuracy_score(Y_test, y_pred_stopWords_MNB_sentiments))
+      metrics.accuracy_score(Z_test, y_pred_stopWords_MNB_sentiments))
 performance.write("Confusion Matrix of sentiments using MNB with english stop words: \n")
 performance.write("Confusion Matrix of MNB sentiments:\n")
-print(confusion_matrix(Y_test, y_pred_stopWords_MNB_sentiments), file=performance)
+print(confusion_matrix(Z_test, y_pred_stopWords_MNB_sentiments), file=performance)
 performance.write("Classification report of MNB sentiments with english stop words: \n")
-print(classification_report(Y_test, y_pred_stopWords_MNB_sentiments), file=performance)
+print(classification_report(Z_test, y_pred_stopWords_MNB_sentiments), file=performance)
 print('----------------------------------------------------')
 
 # Top
