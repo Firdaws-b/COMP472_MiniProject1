@@ -5,7 +5,7 @@ This project will be exploring on how to apply different machine learning algori
 # How to run
 To run this file:
 
-1. Download the files.
+1. Download the files from GitHub repository: https://github.com/Firdaws-b/COMP472_MiniProject1 
 2. Open your preferred IDE. We will be referring to Pycharm.
 3. Click on File tab and Open.
 4. Open the file with the correct directory (where the file is dowloaded).
