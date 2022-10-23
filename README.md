@@ -19,6 +19,6 @@ To run this file:
 - analysis.pdf -> Analysis of the results
 
 # Contributors: 
-Shangirna Rajaratnam
-Firdaws Bouzeghaya 
-Kawther Bouzeghaya
+-Shangirna Rajaratnam
+-Firdaws Bouzeghaya 
+-Kawther Bouzeghaya
