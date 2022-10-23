@@ -17,3 +17,8 @@ To run this file:
 - figure2.pdf -> Figure of sentiment dataset distribution
 - performance.txt -> Performance file of the algorithms. Can be deleted and when you run the main it will regenerate again.
 - analysis.pdf -> Analysis of the results
+
+# Contributors: 
+Shangirna Rajaratnam
+Firdaws Bouzeghaya 
+Kawther Bouzeghaya
